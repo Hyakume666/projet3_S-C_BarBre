@@ -9,9 +9,10 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import ch.weather.meteo.config.ConfigManager;
 
 public class APIClass {
-    private static final String OWM_APIKEY = "b65a26eae33026f6cd6954f6ebd0f7bd";
+    private static String OWM_API_KEY = ConfigManager.getOwmApiKey();
     private String owmResponse;
 
     public APIClass() {
