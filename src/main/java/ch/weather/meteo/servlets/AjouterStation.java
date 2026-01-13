@@ -17,7 +17,7 @@ import java.io.IOException;
  */
 @WebServlet(name = "ajouterStation", value = "/ajouter-station")
 public class AjouterStation extends HttpServlet {
-    
+
     private MeteoService meteoService;
 
     @Override
@@ -30,7 +30,7 @@ public class AjouterStation extends HttpServlet {
      * Affiche le formulaire d'ajout de station.
      */
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) 
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);
     }
@@ -39,15 +39,15 @@ public class AjouterStation extends HttpServlet {
      * Traite la soumission du formulaire d'ajout de station.
      */
     @Override
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) 
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        
+
         String latitudeStr = request.getParameter("latitude");
         String longitudeStr = request.getParameter("longitude");
-        
+
         // Validation des paramètres
-        if (latitudeStr == null || latitudeStr.trim().isEmpty() 
-            || longitudeStr == null || longitudeStr.trim().isEmpty()) {
+        if (latitudeStr == null || latitudeStr.trim().isEmpty()
+                || longitudeStr == null || longitudeStr.trim().isEmpty()) {
             request.setAttribute("error", "Latitude et longitude sont requises.");
             request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);
             return;
@@ -80,16 +80,17 @@ public class AjouterStation extends HttpServlet {
         try {
             // Créer la station via le service
             StationMeteo station = meteoService.createStation(latitude, longitude);
-            
+
             if (station != null && station.getNumero() != null) {
                 // Succès - rediriger vers l'accueil avec message
-                response.sendRedirect(request.getContextPath() + 
-                    "/stations?success=Station '" + encodeForUrl(station.getNom()) + "' ajoutée avec succès!");
+                String message = "Station '" + station.getNom() + "' ajoutee avec succes!";
+                response.sendRedirect(request.getContextPath() +
+                        "/stations?success=" + java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8));
             } else {
                 request.setAttribute("error", "Erreur lors de la création de la station.");
                 request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);
             }
-            
+
         } catch (IllegalArgumentException e) {
             request.setAttribute("error", e.getMessage());
             request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);

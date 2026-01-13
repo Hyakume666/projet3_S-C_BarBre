@@ -54,14 +54,19 @@ public class MeteoService {
             throw new RuntimeException("Impossible de récupérer les données depuis OpenWeatherMap");
         }
 
+        // Si le nom est vide, refuser l'ajout
+        if (stationFromApi.getNom() == null || stationFromApi.getNom().trim().isEmpty()) {
+            throw new IllegalArgumentException("Aucune station meteo connue a ces coordonnees. Veuillez verifier la latitude et la longitude.");
+        }
+
         // Vérifier si la station existe déjà (par OpenWeatherMap ID)
         StationMeteo existingStation = StationMeteoDAO.researchByOpenWeatherMapId(stationFromApi.getOpenWeatherMapId());
         if (existingStation != null) {
             // La station existe déjà, on ajoute juste les nouvelles mesures
             if (meteoFromApi != null) {
                 Meteo existingMeteo = MeteoDAO.researchByDateAndStation(
-                    meteoFromApi.getDateMesure(), 
-                    existingStation.getNumero()
+                        meteoFromApi.getDateMesure(),
+                        existingStation.getNumero()
                 );
                 if (existingMeteo == null) {
                     MeteoDAO.create(meteoFromApi, existingStation.getNumero());
@@ -117,8 +122,8 @@ public class MeteoService {
 
         // Vérifier si cette mesure existe déjà
         Meteo existingMeteo = MeteoDAO.researchByDateAndStation(
-            meteoFromApi.getDateMesure(), 
-            stationNumero
+                meteoFromApi.getDateMesure(),
+                stationNumero
         );
 
         if (existingMeteo != null) {
@@ -152,8 +157,8 @@ public class MeteoService {
                 }
             } catch (Exception e) {
                 // Log l'erreur mais continue avec les autres stations
-                System.err.println("Erreur lors du rafraîchissement de la station " 
-                    + station.getNumero() + ": " + e.getMessage());
+                System.err.println("Erreur lors du rafraîchissement de la station "
+                        + station.getNumero() + ": " + e.getMessage());
             }
         }
 
@@ -263,5 +268,24 @@ public class MeteoService {
      */
     public List<Object[]> getAllStationsWithLatestMeasurement() {
         return MeteoDAO.getLatestMeasurementPerStation();
+    }
+
+    /**
+     * Supprime une station et toutes ses mesures météo.
+     *
+     * @param stationNumero le numéro de la station à supprimer
+     * @throws IllegalArgumentException si la station n'existe pas
+     */
+    public void deleteStation(Integer stationNumero) {
+        StationMeteo station = StationMeteoDAO.findByNumero(stationNumero);
+        if (station == null) {
+            throw new IllegalArgumentException("Station non trouvee: " + stationNumero);
+        }
+
+        // Supprimer d'abord les mesures météo associées
+        MeteoDAO.deleteByStation(stationNumero);
+
+        // Puis supprimer la station
+        StationMeteoDAO.delete(station);
     }
 }

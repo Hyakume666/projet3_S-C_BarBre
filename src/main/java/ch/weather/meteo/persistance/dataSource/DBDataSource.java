@@ -29,7 +29,7 @@ public class DBDataSource {
             throw new RuntimeException(e);
         }
 
-        USER = props.getProperty("db.schema");
+        USER = props.getProperty("db.username");
         PASSWORD = props.getProperty("db.password");
 
         try {

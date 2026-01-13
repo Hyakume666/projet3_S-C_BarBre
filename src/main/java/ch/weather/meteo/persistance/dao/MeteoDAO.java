@@ -156,6 +156,32 @@ public class MeteoDAO {
         }
     }
 
+    // DELETE ALL METEO BY STATION
+    public static void deleteByStation(Integer station_num) {
+        Connection c = null;
+        OraclePreparedStatement pstmt = null;
+
+        try {
+            c = DBDataSource.getConnection();
+            c.setAutoCommit(false);
+            pstmt = (OraclePreparedStatement) c.prepareStatement("DELETE FROM METEO WHERE NUM_STATIONMETEO = ?");
+            pstmt.setInt(1, station_num);
+
+            pstmt.executeUpdate();
+            c.commit();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (pstmt != null) {pstmt.close();}
+                if (c != null) {c.close();}
+                DBDataSource.closeConnection();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     /**
      * Récupère la dernière mesure de chaque station avec les infos de la station.
      * Utilisé pour le classement des stations les plus chaudes/froides.
@@ -190,14 +216,14 @@ public class MeteoDAO {
             while (rs.next()) {
                 // Créer l'objet Meteo
                 Meteo meteo = new Meteo(
-                    rs.getInt("NUMERO"),
-                    toUtilDate(rs.getDate("DATEMESURE")),
-                    rs.getDouble("TEMPERATURE"),
-                    rs.getString("DESCRIPTION"),
-                    rs.getDouble("PRESSION"),
-                    rs.getDouble("HUMIDITE"),
-                    rs.getInt("VISIBILITE"),
-                    rs.getDouble("PRECIPITATION")
+                        rs.getInt("NUMERO"),
+                        toUtilDate(rs.getDate("DATEMESURE")),
+                        rs.getDouble("TEMPERATURE"),
+                        rs.getString("DESCRIPTION"),
+                        rs.getDouble("PRESSION"),
+                        rs.getDouble("HUMIDITE"),
+                        rs.getInt("VISIBILITE"),
+                        rs.getDouble("PRECIPITATION")
                 );
 
                 // Créer l'objet StationMeteo
