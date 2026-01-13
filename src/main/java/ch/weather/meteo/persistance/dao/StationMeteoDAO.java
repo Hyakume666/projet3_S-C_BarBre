@@ -193,4 +193,50 @@ public class StationMeteoDAO {
             }
         }
     }
+    /**
+     * Recherche une station par son numéro.
+     * @param numero le numéro de la station
+     * @return la station ou null si non trouvée
+     */
+    public static StationMeteo findByNumero(Integer numero) {
+        Connection c = null;
+        OraclePreparedStatement pstmt = null;
+        ResultSet rs = null;
+        StationMeteo station = null;
+
+        try {
+            c = DBDataSource.getConnection();
+            pstmt = (OraclePreparedStatement) c.prepareStatement(
+                    "SELECT * FROM STATIONMETEO WHERE NUMERO = ?"
+            );
+            pstmt.setInt(1, numero);
+            rs = pstmt.executeQuery();
+
+            if (rs.next()) {
+                station = new StationMeteo();
+                station.setNumero(rs.getInt("NUMERO"));
+                station.setLatitude(rs.getDouble("LATITUDE"));
+                station.setLongitude(rs.getDouble("LONGITUDE"));
+                station.setNom(rs.getString("NOM"));
+                station.setOpenWeatherMapId(rs.getInt("OPENWEATHERMAPID"));
+
+                Integer numPays = rs.getInt("NUM_PAYS");
+                if (!rs.wasNull()) {
+                    station.setPays(PaysDAO.findByNumero(numPays));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (c != null) c.close();
+                DBDataSource.closeConnection();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return station;
+    }
 }

@@ -12,7 +12,7 @@ import java.net.http.HttpResponse;
 import ch.weather.meteo.config.ConfigManager;
 
 public class APIClass {
-    private static String OWM_API_KEY = ConfigManager.getOwmApiKey();
+    private static String OWM_APIKEY = ConfigManager.getOwmApiKey();
     private String owmResponse;
 
     public APIClass() {
