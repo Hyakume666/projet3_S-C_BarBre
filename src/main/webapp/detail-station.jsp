@@ -4,7 +4,7 @@
 <%@ page import="java.util.Date" %>
 <%@ page import="java.util.List" %>
 <%@ page import="java.util.ArrayList" %>
-<%@ page import="java.util.Comparator" %>
+<%@ page import="java.util.Collections" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <!DOCTYPE html>
@@ -12,214 +12,436 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Détail Station - HEG Météo</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <title>Détail Station - MorphéoMétéo</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
-        .weather-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        :root {
+            --pokemon-red: #E3350D;
+            --pokemon-blue: #3B5CA8;
+            --pokemon-yellow: #FFCB05;
+        }
+
+        * { font-family: 'Nunito', sans-serif; }
+
+        body {
+            background: linear-gradient(180deg, #87CEEB 0%, #E0F6FF 50%, #fff 100%);
+            min-height: 100vh;
+        }
+
+        .station-hero {
+            padding: 2rem 0;
+            position: relative;
+        }
+
+        .station-hero.type-sun { background: linear-gradient(180deg, #FFF8E7 0%, #FFE8B8 100%); }
+        .station-hero.type-rain { background: linear-gradient(180deg, #E8F4FF 0%, #B8D8FF 100%); }
+        .station-hero.type-snow { background: linear-gradient(180deg, #F0FFFF 0%, #D8F5F5 100%); }
+        .station-hero.type-normal { background: linear-gradient(180deg, #F8F8F8 0%, #E8E8E8 100%); }
+
+        .morpheo-detail {
+            width: 150px;
+            height: 150px;
+            animation: float 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+
+        .station-name {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--pokemon-blue);
+        }
+
+        .country-badge {
+            background: var(--pokemon-blue);
+            color: white;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .temperature-hero {
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .type-sun .temperature-hero { color: #E67E00; }
+        .type-rain .temperature-hero { color: #3A6BC6; }
+        .type-snow .temperature-hero { color: #5BBDBD; }
+        .type-normal .temperature-hero { color: #6B6F78; }
+
+        .weather-description {
+            font-size: 1.3rem;
+            color: #666;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .stat-box {
+            background: white;
+            border-radius: 15px;
+            padding: 1.2rem;
+            text-align: center;
+            border: 3px solid #eee;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+
+        .stat-box .icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-box .value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--pokemon-blue);
+        }
+
+        .stat-box .label {
+            font-size: 0.8rem;
+            color: #888;
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .history-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+            border: 3px solid #eee;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        }
+
+        .history-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .history-title h3 {
+            font-weight: 800;
+            color: var(--pokemon-blue);
+            margin: 0;
+        }
+
+        .history-table {
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .history-table thead {
+            background: linear-gradient(90deg, var(--pokemon-blue) 0%, #2A4A7C 100%);
+            color: white;
+        }
+
+        .history-table thead th {
+            font-weight: 700;
+            padding: 1rem;
+            border: none;
+        }
+
+        .history-table tbody tr {
+            transition: all 0.2s ease;
+        }
+
+        .history-table tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+        }
+
+        .history-table td {
+            padding: 0.8rem 1rem;
+            vertical-align: middle;
+        }
+
+        .temp-badge {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+
+        .temp-hot { background: #FFE8D6; color: #E67E00; }
+        .temp-warm { background: #FFF8E7; color: #B8860B; }
+        .temp-cool { background: #E8F4FF; color: #3A6BC6; }
+        .temp-cold { background: #D8F5F5; color: #5BBDBD; }
+
+        .btn-pokemon {
+            background: linear-gradient(180deg, #E3350D 0%, #B22D0D 100%);
+            border: 3px solid #8B1E08;
+            color: white;
+            font-weight: 700;
+            border-radius: 30px;
+            padding: 0.6rem 1.5rem;
+            box-shadow: 0 3px 0 #8B1E08;
+            transition: all 0.2s ease;
+        }
+
+        .btn-pokemon:hover {
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #8B1E08;
+        }
+
+        .btn-pokemon-secondary {
+            background: linear-gradient(180deg, var(--pokemon-yellow) 0%, #D4A904 100%);
+            border: 3px solid #A68500;
+            color: #333;
+            font-weight: 700;
+            border-radius: 30px;
+            padding: 0.6rem 1.5rem;
+            box-shadow: 0 3px 0 #A68500;
+        }
+
+        .btn-pokemon-secondary:hover {
+            color: #333;
+            transform: translateY(-2px);
+        }
+
+        .coords-info {
+            font-family: monospace;
+            background: rgba(0,0,0,0.05);
+            padding: 0.3rem 0.8rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+
+        .alert-pokemon-success {
+            background: linear-gradient(90deg, #78C850 0%, #5CA935 100%);
+            border: none;
             color: white;
             border-radius: 15px;
-        }
-        .temp-display {
-            font-size: 3rem;
-            font-weight: bold;
-        }
-        .weather-icon {
-            font-size: 4rem;
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
-    <% String activePage = "detail"; %>
-    <%@ include file="menu.jsp" %>
-    
-    <main class="container-fluid">
-        <div class="p-5 rounded">
-            
-            <%-- Récupération de la station --%>
-            <% 
-                StationMeteo station = (StationMeteo) request.getAttribute("station");
-                SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
-            %>
-            
-            <% if (station == null) { %>
-                <div class="alert alert-danger" role="alert">
-                    Station non trouvée.
-                    <a href="<%= application.getContextPath() %>/stations" class="alert-link">Retour à la liste</a>
-                </div>
-            <% } else { %>
-            
-                <%-- Affichage des messages de succès --%>
-                <% String success = (String) request.getAttribute("success"); %>
-                <% if (success != null && !success.isEmpty()) { %>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <strong>Succès!</strong> <%= success %>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <% } %>
-                
-                <%-- Breadcrumb --%>
-                <nav aria-label="breadcrumb" class="mb-4">
+<% String activePage = ""; %>
+<%@ include file="menu.jsp" %>
+
+<%
+    StationMeteo station = (StationMeteo) request.getAttribute("station");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm");
+
+    // Trouver la dernière mesure
+    Meteo latestMeteo = null;
+    Date latestDate = null;
+    Map<Date, Meteo> mesures = station != null ? station.getDonneesMeteo() : null;
+
+    if (mesures != null && !mesures.isEmpty()) {
+        for (Map.Entry<Date, Meteo> entry : mesures.entrySet()) {
+            if (latestDate == null || entry.getKey().after(latestDate)) {
+                latestDate = entry.getKey();
+                latestMeteo = entry.getValue();
+            }
+        }
+    }
+
+    // Déterminer le type Morphéo
+    String morpheoType = "normal";
+    String morpheoSprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/351.png";
+
+    if (latestMeteo != null) {
+        double temp = latestMeteo.getTemperature();
+        String desc = latestMeteo.getDescription() != null ? latestMeteo.getDescription().toLowerCase() : "";
+
+        if (desc.contains("neige") || desc.contains("snow") || temp < 0) {
+            morpheoType = "snow";
+            morpheoSprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10015.png";
+        } else if (desc.contains("pluie") || desc.contains("rain") || desc.contains("drizzle") || desc.contains("averse")) {
+            morpheoType = "rain";
+            morpheoSprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10014.png";
+        } else if (temp >= 25 || desc.contains("soleil") || desc.contains("sun") || desc.contains("clear") || desc.contains("clair")) {
+            morpheoType = "sun";
+            morpheoSprite = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/10013.png";
+        }
+    }
+%>
+
+<% if (station == null) { %>
+<div class="container py-5 text-center">
+    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/351.png"
+         width="150" alt="Morphéo triste" style="opacity: 0.5;">
+    <h2 class="mt-4" style="color: var(--pokemon-blue);">Station introuvable !</h2>
+    <p class="text-muted">Cette station n'existe pas ou a été supprimée.</p>
+    <a href="<%= application.getContextPath() %>/stations" class="btn btn-pokemon mt-3">
+        ← Retour à l'accueil
+    </a>
+</div>
+<% } else { %>
+
+<%-- Messages --%>
+<div class="container mt-3">
+    <% String success = (String) request.getAttribute("success"); %>
+    <% if (success != null && !success.isEmpty()) { %>
+    <div class="alert alert-pokemon-success alert-dismissible fade show" role="alert">
+        ✨ <%= success %>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert"></button>
+    </div>
+    <% } %>
+</div>
+
+<%-- Hero Section --%>
+<section class="station-hero type-<%= morpheoType %>">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-4 text-center mb-4 mb-md-0">
+                <img src="<%= morpheoSprite %>" alt="Morphéo" class="morpheo-detail">
+            </div>
+            <div class="col-md-8">
+                <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item">
-                            <a href="<%= application.getContextPath() %>/stations">Stations</a>
-                        </li>
-                        <li class="breadcrumb-item active" aria-current="page"><%= station.getNom() %></li>
+                        <li class="breadcrumb-item"><a href="<%= application.getContextPath() %>/stations">🏠 Accueil</a></li>
+                        <li class="breadcrumb-item active"><%= station.getNom() %></li>
                     </ol>
                 </nav>
-                
-                <%-- En-tête avec infos station --%>
-                <div class="row mb-4">
-                    <div class="col-md-8">
-                        <h2>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-geo-alt me-2" viewBox="0 0 16 16">
-                                <path d="M12.166 8.94c-.524 1.062-1.234 2.12-1.96 3.07A32 32 0 0 1 8 14.58a32 32 0 0 1-2.206-2.57c-.726-.95-1.436-2.008-1.96-3.07C3.304 7.867 3 6.862 3 6a5 5 0 0 1 10 0c0 .862-.305 1.867-.834 2.94M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10"/>
-                                <path d="M8 8a2 2 0 1 1 0-4 2 2 0 0 1 0 4m0 1a3 3 0 1 0 0-6 3 3 0 0 0 0 6"/>
-                            </svg>
-                            <%= station.getNom() %>
-                        </h2>
-                        <p class="text-muted">
-                            <% if (station.getPays() != null) { %>
-                                <%= station.getPays().getNom() %> (<%= station.getPays().getCode() %>)
-                            <% } %>
-                            &bull; 
-                            Lat: <%= String.format("%.4f", station.getLatitude()) %>, 
-                            Lon: <%= String.format("%.4f", station.getLongitude()) %>
-                            &bull;
-                            OWM ID: <%= station.getOpenWeatherMapId() %>
-                        </p>
-                    </div>
-                    <div class="col-md-4 text-end">
-                        <a href="<%= application.getContextPath() %>/refresh?id=<%= station.getNumero() %>" 
-                           class="btn btn-primary">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise me-1" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/>
-                                <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/>
-                            </svg>
-                            Rafraîchir les données
-                        </a>
-                    </div>
+
+                <h1 class="station-name"><%= station.getNom() %></h1>
+
+                <% if (station.getPays() != null) { %>
+                <span class="country-badge mb-2"><%= station.getPays().getNom() %></span>
+                <% } %>
+
+                <div class="coords-info mt-2 d-inline-block">
+                    📍 <%= String.format("%.4f", station.getLatitude()) %>, <%= String.format("%.4f", station.getLongitude()) %>
                 </div>
-                
-                <%-- Carte météo actuelle (dernière mesure) --%>
-                <% 
-                    Map<Date, Meteo> mesuresMap = station.getDonneesMeteo();
-                    List<Meteo> mesures = new ArrayList<>();
-                    if (mesuresMap != null) {
-                        mesures.addAll(mesuresMap.values());
-                        mesures.sort(Comparator.comparing(Meteo::getDateMesure).reversed());
-                    }
-                    Meteo derniereMesure = mesures.isEmpty() ? null : mesures.get(0);
-                %>
-                
-                <% if (derniereMesure != null) { %>
-                    <div class="card weather-card mb-4">
-                        <div class="card-body">
-                            <div class="row align-items-center">
-                                <div class="col-md-4 text-center">
-                                    <div class="weather-icon">🌤️</div>
-                                    <p class="mb-0"><%= derniereMesure.getDescription() %></p>
-                                </div>
-                                <div class="col-md-4 text-center">
-                                    <div class="temp-display">
-                                        <%= String.format("%.1f", derniereMesure.getTemperature()) %>°C
-                                    </div>
-                                    <p class="mb-0">Température actuelle</p>
-                                </div>
-                                <div class="col-md-4">
-                                    <ul class="list-unstyled mb-0">
-                                        <li>
-                                            <strong>Humidité:</strong> 
-                                            <%= String.format("%.0f", derniereMesure.getHumidite()) %>%
-                                        </li>
-                                        <li>
-                                            <strong>Pression:</strong> 
-                                            <%= String.format("%.0f", derniereMesure.getPression()) %> hPa
-                                        </li>
-                                        <li>
-                                            <strong>Visibilité:</strong> 
-                                            <%= derniereMesure.getVisibilite() / 1000.0 %> km
-                                        </li>
-                                        <li>
-                                            <strong>Précipitations:</strong> 
-                                            <%= String.format("%.1f", derniereMesure.getPrecipitation()) %> mm
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="text-end mt-2">
-                                <small>Dernière mise à jour: <%= dateFormat.format(derniereMesure.getDateMesure()) %></small>
-                            </div>
-                        </div>
-                    </div>
-                <% } else { %>
-                    <div class="alert alert-info mb-4" role="alert">
-                        Aucune mesure météo disponible. 
-                        <a href="<%= application.getContextPath() %>/refresh?id=<%= station.getNumero() %>" class="alert-link">
-                            Rafraîchir les données
-                        </a>
-                    </div>
-                <% } %>
-                
-                <%-- Historique des mesures --%>
-                <h4 class="mb-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock-history me-2" viewBox="0 0 16 16">
-                        <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483m.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.081-.51l.993.123a8 8 0 0 1-.23 1.155l-.964-.267q.069-.247.12-.501m-.952 2.379q.276-.436.486-.908l.914.405q-.24.54-.555 1.038zm-.964 1.205q.183-.183.35-.378l.758.653a8 8 0 0 1-.401.432z"/>
-                        <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
-                        <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
-                    </svg>
-                    Historique des mesures
-                    <span class="badge bg-secondary"><%= mesures.size() %></span>
-                </h4>
-                
-                <% if (mesures.isEmpty()) { %>
-                    <p class="text-muted">Aucune mesure enregistrée.</p>
-                <% } else { %>
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Température</th>
-                                    <th>Description</th>
-                                    <th>Humidité</th>
-                                    <th>Pression</th>
-                                    <th>Visibilité</th>
-                                    <th>Précipitations</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <% for (Meteo mesure : mesures) { %>
-                                    <tr>
-                                        <td><%= dateFormat.format(mesure.getDateMesure()) %></td>
-                                        <td>
-                                            <strong><%= String.format("%.1f", mesure.getTemperature()) %>°C</strong>
-                                        </td>
-                                        <td><%= mesure.getDescription() %></td>
-                                        <td><%= String.format("%.0f", mesure.getHumidite()) %>%</td>
-                                        <td><%= String.format("%.0f", mesure.getPression()) %> hPa</td>
-                                        <td><%= mesure.getVisibilite() / 1000.0 %> km</td>
-                                        <td><%= String.format("%.1f", mesure.getPrecipitation()) %> mm</td>
-                                    </tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
-                <% } %>
-                
+
+                <% if (latestMeteo != null) { %>
                 <div class="mt-4">
-                    <a href="<%= application.getContextPath() %>/stations" class="btn btn-outline-secondary">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left me-1" viewBox="0 0 16 16">
-                            <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
-                        </svg>
-                        Retour à la liste
+                    <div class="temperature-hero">
+                        <%= String.format("%.1f", latestMeteo.getTemperature()) %>°C
+                    </div>
+                    <div class="weather-description">
+                        <%= latestMeteo.getDescription() != null ? latestMeteo.getDescription() : "" %>
+                    </div>
+                    <% if (latestDate != null) { %>
+                    <small class="text-muted">🕐 Dernière mise à jour : <%= dateFormat.format(latestDate) %></small>
+                    <% } %>
+                </div>
+                <% } else { %>
+                <div class="mt-4">
+                    <div class="temperature-hero" style="color: #999;">—°C</div>
+                    <div class="weather-description">Aucune mesure disponible</div>
+                </div>
+                <% } %>
+
+                <div class="mt-4 d-flex gap-2 flex-wrap">
+                    <a href="<%= application.getContextPath() %>/refresh?id=<%= station.getNumero() %>" class="btn btn-pokemon">
+                        ↻ Rafraîchir les données
+                    </a>
+                    <a href="<%= application.getContextPath() %>/stations" class="btn btn-pokemon-secondary">
+                        ← Retour à la liste
                     </a>
                 </div>
-                
-            <% } %>
+            </div>
         </div>
-    </main>
-    
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
+        <% if (latestMeteo != null) { %>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="icon">💧</div>
+                <div class="value"><%= String.format("%.0f", latestMeteo.getHumidite()) %>%</div>
+                <div class="label">Humidité</div>
+            </div>
+            <div class="stat-box">
+                <div class="icon">⬇️</div>
+                <div class="value"><%= String.format("%.0f", latestMeteo.getPression()) %></div>
+                <div class="label">Pression (hPa)</div>
+            </div>
+            <div class="stat-box">
+                <div class="icon">👁️</div>
+                <div class="value"><%= latestMeteo.getVisibilite() / 1000.0 %></div>
+                <div class="label">Visibilité (km)</div>
+            </div>
+            <div class="stat-box">
+                <div class="icon">🌧️</div>
+                <div class="value"><%= String.format("%.1f", latestMeteo.getPrecipitation()) %></div>
+                <div class="label">Précipitations (mm)</div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</section>
+
+<%-- Historique --%>
+<div class="container">
+    <div class="history-section">
+        <div class="history-title">
+            <span style="font-size: 2rem;">📊</span>
+            <h3>Historique des mesures (<%= mesures != null ? mesures.size() : 0 %>)</h3>
+        </div>
+
+        <% if (mesures != null && !mesures.isEmpty()) { %>
+        <%
+            // Trier les dates par ordre décroissant
+            List<Date> sortedDates = new ArrayList<>(mesures.keySet());
+            Collections.sort(sortedDates, Collections.reverseOrder());
+        %>
+        <div class="table-responsive">
+            <table class="table history-table">
+                <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Température</th>
+                    <th>Description</th>
+                    <th>Humidité</th>
+                    <th>Pression</th>
+                </tr>
+                </thead>
+                <tbody>
+                <% for (Date date : sortedDates) {
+                    Meteo m = mesures.get(date);
+                    String tempClass = "temp-cool";
+                    if (m.getTemperature() >= 30) tempClass = "temp-hot";
+                    else if (m.getTemperature() >= 20) tempClass = "temp-warm";
+                    else if (m.getTemperature() < 5) tempClass = "temp-cold";
+                %>
+                <tr>
+                    <td><strong><%= dateFormat.format(date) %></strong></td>
+                    <td>
+                                    <span class="temp-badge <%= tempClass %>">
+                                        <%= String.format("%.1f", m.getTemperature()) %>°C
+                                    </span>
+                    </td>
+                    <td><%= m.getDescription() != null ? m.getDescription() : "—" %></td>
+                    <td>💧 <%= String.format("%.0f", m.getHumidite()) %>%</td>
+                    <td><%= String.format("%.0f", m.getPression()) %> hPa</td>
+                </tr>
+                <% } %>
+                </tbody>
+            </table>
+        </div>
+        <% } else { %>
+        <div class="text-center py-4">
+            <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/351.png"
+                 width="80" alt="Morphéo" style="opacity: 0.5;">
+            <p class="text-muted mt-3">Aucune mesure enregistrée pour cette station.</p>
+            <a href="<%= application.getContextPath() %>/refresh?id=<%= station.getNumero() %>" class="btn btn-pokemon">
+                ↻ Récupérer les données
+            </a>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<% } %>
+
+<div class="py-4"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
