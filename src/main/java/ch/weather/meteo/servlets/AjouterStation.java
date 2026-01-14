@@ -82,10 +82,10 @@ public class AjouterStation extends HttpServlet {
             StationMeteo station = meteoService.createStation(latitude, longitude);
 
             if (station != null && station.getNumero() != null) {
-                // Succès - rediriger vers l'accueil avec message
-                String message = "Station '" + station.getNom() + "' ajoutee avec succes!";
-                response.sendRedirect(request.getContextPath() +
-                        "/stations?success=" + java.net.URLEncoder.encode(message, java.nio.charset.StandardCharsets.UTF_8));
+                // Succès - rester sur la page avec message de confirmation
+                request.setAttribute("success", "Station '" + station.getNom() + "' ajoutée avec succès !");
+                request.setAttribute("station", station);
+                request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "Erreur lors de la création de la station.");
                 request.getRequestDispatcher("/ajouter-station.jsp").forward(request, response);
