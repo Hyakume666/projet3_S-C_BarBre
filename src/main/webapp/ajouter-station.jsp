@@ -293,7 +293,7 @@
                 </div>
 
                 <div class="examples-card">
-                    <h5>💡 Exemples de coordonnées</h5>
+                    <h5>Exemples de coordonnées</h5>
                     <div class="example-item">
                         <span class="city">🇨🇭 La Chaux-de-Fonds</span>
                         <span class="coords">47.0997, 6.8261</span>

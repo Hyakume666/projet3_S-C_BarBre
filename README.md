@@ -6,7 +6,7 @@ Application web Java (Servlet + JSP) permettant de gérer des stations météo e
 
 ---
 
-## 👥 Membres du groupe
+## Membres du groupe
 
 | Nom        | Prénom  |
 |------------|---------|
@@ -15,7 +15,7 @@ Application web Java (Servlet + JSP) permettant de gérer des stations météo e
 
 ---
 
-## 🚀 Installation et Configuration
+## Installation et Configuration
 
 ### Prérequis
 
@@ -23,7 +23,7 @@ Application web Java (Servlet + JSP) permettant de gérer des stations météo e
 - **Apache Tomcat 11**
 - **IntelliJ IDEA**
 - **Oracle Database** (accès à db.ig.he-arc.ch)
-- **Clé API OpenWeatherMap** (gratuite sur [openweathermap.org](https://openweathermap.org/api))
+- **Clé API gratuite OpenWeatherMap**
 
 ### Étape 1 : Cloner le projet
 
@@ -76,15 +76,15 @@ cd projet3_S-C_BarBre
     - Retourner dans l'onglet `Server`
     - Modifier le champ `URL` : `http://localhost:8080/meteo/`
 
-   > 💡 Le `pom.xml` contient `<finalName>meteo</finalName>` qui définit le nom du WAR
+   > Le `pom.xml` contient `<finalName>meteo</finalName>` qui définit le nom du WAR
 
 5. **Lancer l'application** :
-    - Cliquer sur le bouton ▶️ (Run)
+    - Cliquer sur le bouton Run
     - L'application sera accessible sur `http://localhost:8080/meteo/`
 
 ---
 
-## 📋 Fonctionnalités
+## Fonctionnalités
 
 ### Fonctionnalités communes
 - ✅ Saisie d'une nouvelle station météo via coordonnées GPS
@@ -95,11 +95,11 @@ cd projet3_S-C_BarBre
 - ✅ Suppression d'une station météo
 
 ### Fonctionnalité bonus
-- 🌡️ **Lieux les plus chauds/froids** : Affichage d'un classement des stations par température (basé sur la dernière mesure de chaque station)
+- ✅ **Lieux les plus chauds/froids** : Affichage d'un classement des stations par température (basé sur la dernière mesure de chaque station)
 
 ---
 
-## 🛠️ Technologies utilisées
+## Technologies utilisées
 
 | Technologie | Version | Usage |
 |-------------|---------|-------|
@@ -115,7 +115,7 @@ cd projet3_S-C_BarBre
 
 ---
 
-## 📁 Structure du projet
+## Structure du projet
 
 ```
 projet3_S-C_BarBre/
@@ -147,7 +147,7 @@ projet3_S-C_BarBre/
 
 ---
 
-## 🗄️ Schéma de la base de données
+## Schéma de la base de données
 
 ```
 ┌─────────────┐       ┌─────────────────┐       ┌─────────────-┐
@@ -167,7 +167,7 @@ projet3_S-C_BarBre/
 
 ---
 
-## 🔧 Dépannage
+## Dépannage
 
 ### Erreur 404 au lancement
 - Vérifiez que l'`Application context` est bien `/meteo` dans la configuration Tomcat
