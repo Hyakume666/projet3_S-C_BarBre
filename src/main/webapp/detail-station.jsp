@@ -305,7 +305,7 @@
             <div class="col-md-8">
                 <nav aria-label="breadcrumb" class="mb-3">
                     <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="<%= application.getContextPath() %>/stations">🏠 Accueil</a></li>
+                        <li class="breadcrumb-item"><a href="<%= application.getContextPath() %>/stations">Accueil</a></li>
                         <li class="breadcrumb-item active"><%= station.getNom() %></li>
                     </ol>
                 </nav>
@@ -381,7 +381,6 @@
 <div class="container">
     <div class="history-section">
         <div class="history-title">
-            <span style="font-size: 2rem;">📊</span>
             <h3>Historique des mesures (<%= mesures != null ? mesures.size() : 0 %>)</h3>
         </div>
 

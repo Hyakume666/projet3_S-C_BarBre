@@ -636,7 +636,7 @@
 
                 <div class="card-actions">
                     <a href="<%= application.getContextPath() %>/station?id=<%= station.getNumero() %>" class="btn btn-outline-primary">
-                        👁️ Détails
+                        Détails
                     </a>
                     <a href="<%= application.getContextPath() %>/refresh?id=<%= station.getNumero() %>" class="btn btn-outline-success">
                         ↻ Rafraîchir

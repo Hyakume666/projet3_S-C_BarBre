@@ -51,6 +51,7 @@ public class APIClass {
                 + "lat=" + sm.getLatitude()
                 + "&lon=" + sm.getLongitude()
                 + "&units=metric"
+                + "&lang=fr"
                 + "&appid=" + OWM_APIKEY;
 
         //System.out.println(url);
