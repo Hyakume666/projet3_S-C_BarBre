@@ -207,10 +207,11 @@ public class MeteoService {
         // Chercher le pays existant
         Pays existingPays = PaysDAO.findByCode(code);
         if (existingPays != null) {
+            System.out.println("Pays trouvé: " + existingPays.getNom() + " (ID: " + existingPays.getNumero() + ")");
             return existingPays;
         }
 
-        // Récupérer les infos du pays via le webservice HE-Arc
+        // Le pays n'existe pas, le récupérer depuis l'API
         APIClass api = new APIClass();
         Pays paysFromApi = api.getCountryDatas(code, "fr");
 
@@ -218,16 +219,28 @@ public class MeteoService {
             // Créer un pays minimal si le WS échoue
             paysFromApi = new Pays();
             paysFromApi.setCode(code);
-            paysFromApi.setNom(code); // Utiliser le code comme nom par défaut
+            paysFromApi.setNom(code);
+        }
+
+        // Vérifier UNE DERNIÈRE FOIS avant d'insérer (au cas où un autre thread l'aurait créé)
+        Pays finalCheck = PaysDAO.findByCode(code);
+        if (finalCheck != null) {
+            return finalCheck;
         }
 
         // Persister le nouveau pays
-        Integer paysNumero = PaysDAO.create(paysFromApi);
-        if (paysNumero != null) {
-            paysFromApi.setNumero(paysNumero);
+        try {
+            Integer paysNumero = PaysDAO.create(paysFromApi);
+            if (paysNumero != null) {
+                paysFromApi.setNumero(paysNumero);
+            }
+            System.out.println("Nouveau pays créé: " + paysFromApi.getNom() + " (ID: " + paysNumero + ")");
+            return paysFromApi;
+        } catch (Exception e) {
+            // Si erreur de contrainte unique, récupérer le pays existant
+            System.err.println("Erreur lors de la création du pays, tentative de récupération: " + e.getMessage());
+            return PaysDAO.findByCode(code);
         }
-
-        return paysFromApi;
     }
 
     /**

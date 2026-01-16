@@ -58,15 +58,20 @@ public class PaysDAO {
 
         try{
             c = DBDataSource.getConnection();
-            pstmt = (OraclePreparedStatement)c.prepareStatement("SELECT * FROM PAYS WHERE CODE = ?");
+            // IMPORTANT: Chercher en majuscules car Oracle stocke en majuscules par défaut
+            pstmt = (OraclePreparedStatement)c.prepareStatement("SELECT * FROM PAYS WHERE UPPER(CODE) = UPPER(?)");
             pstmt.setString(1, code);
 
             rs = pstmt.executeQuery();
 
             if(rs.next()){
                 pays = new Pays(rs.getInt("NUMERO"), rs.getString("CODE"), rs.getString("NOM"));
+                System.out.println("✅ Pays trouvé: " + pays.getNom() + " (CODE: " + pays.getCode() + ")");
+            } else {
+                System.out.println("❌ Aucun pays trouvé avec le code: " + code);
             }
         }catch(Exception e){
+            System.err.println("Erreur lors de la recherche du pays: " + code);
             e.printStackTrace();
         }finally{
             try{
